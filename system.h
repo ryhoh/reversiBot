@@ -17,8 +17,6 @@
 void initialize(int board[][BOARDSIZE]);
 void finalize(int board[][BOARDSIZE]);
 int playerAction(int board[][BOARDSIZE], int color);
-int computerAction(int board[][BOARDSIZE], int color);
-int computerActionAlter(int board[][BOARDSIZE], int color);
 int update(int array[][BOARDSIZE], int grid[2], int color);
 void printBoard(int board[][BOARDSIZE]);
 

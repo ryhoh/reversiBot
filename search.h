@@ -15,6 +15,11 @@ typedef struct _method{
 	int depth;		// 何手先か
 } METHOD;
 
+
+// コンピュータに操作させる場合の関数
+int computerAction(int board[][BOARDSIZE], int color);
+int computerActionAlter(int board[][BOARDSIZE], int color);
+
 // マス選択アルゴリズム
 
 

@@ -9,7 +9,6 @@
 
 #include <stdio.h>
 #include "system.h"
-#include "search.h"
 
 // 色反転操作用の配列
 // flip[BLACK]はWHITEを、flip[WHITE]はBLACKを導くので、
@@ -22,13 +21,13 @@ const int flip[3] = {0, WHITE, BLACK};
 // 盤面の初期化
 void initialize(int board[][BOARDSIZE]){
 	int i, j;
-	
+
 	for(i = 0; i < BOARDSIZE; i++){
 		for(j = 0; j < BOARDSIZE; j++){
 			board[i][j] = 0;
 		}
 	}
-	
+
 	board[3][3] = board[4][4] = BLACK;
 	board[3][4] = board[4][3] = WHITE;
 }
@@ -38,14 +37,14 @@ void finalize(int board[][BOARDSIZE]){
 	int i, j;
 	int num[3] = {0};	// 石の数
 	// num[0]は空白のマスの数、num[1]はBLACKの数、num[2]はWHITEの数
-	
+
 	// 数える
 	for(i = 0; i < BOARDSIZE; i++){
 		for(j = 0; j < BOARDSIZE; j++){
 			num[ board[i][j] ]++;
 		}
 	}
-	
+
 	// 表示する
 	printf("黒%d:白%dで%sの勝ちです\n", num[1], num[2], (num[1]>num[2]) ? "黒" : "白");
 }
@@ -55,10 +54,10 @@ void finalize(int board[][BOARDSIZE]){
 int playerAction(int board[][BOARDSIZE], int color){
 	int grid[2], num;
 	int i, j, ableToPut = 0;
-	
+
 	// 盤面を表示する
 	printBoard(board);
-	
+
 	// どこにも置けない場合（かどうかを判別する）の処理
 	for(i = 0; i < BOARDSIZE; i++){
 		for(j = 0; j < BOARDSIZE; j++){
@@ -68,74 +67,26 @@ int playerAction(int board[][BOARDSIZE], int color){
 				ableToPut = 1;
 		}
 	}
-	
+
 	if(!ableToPut){	// どこにも置けない場合
 		printf("あなたの番ですが、どこにも置くことができません\n");
 		return 0;
 	}
-	
+
 	// 入力を促す
 	while(1){
 		printf("あなたの手を、半角スペース区切りで、x座標(1-8) y座標(1-8)の形で入力してください\n");
 		scanf("%d%d", &grid[0], &grid[1]);
-		
+
 		grid[0]--;	// 内部での座標0-7に変換
 		grid[1]--;
-		
+
 		num = update(board, grid, color);	// ここで石を置く（ことを試みる）
 		if(num > 0)	// 1つ以上ひっくり返すことができたということは
 			break;		// 石を置くことに成功したことを意味する
-		
+
 		printf("そこには置けません\n");
 	}	// 成功するまで繰り返す
-	
-	return num;
-}
-
-// コンピュータが石を置く操作
-// ひっくり返した石の数を返す（置けなければ0）
-int computerAction(int board[][BOARDSIZE], int color){
-	int grid[2], num;
-	
-	// 盤面を表示する
-	printBoard(board);
-	
-	/* ここにマス選択アルゴリズムを書く */
-	// ひっくり返す石の数を必ずnumに入れること
-	num = selectMax(board, grid, color);
-	
-	// どこにも置けない場合
-	if(num == 0){
-		printf("コンピュータの番ですが、どこにも置くことができません\n");
-		return 0;
-	}
-	
-	// ひっくり返す
-	update(board, grid, color);
-
-	return num;
-}
-// 異なるアルゴリズムを持つコンピュータ同士を勝負させる時用
-// コンピュータが石を置く操作
-// ひっくり返した石の数を返す（置けなければ0）
-int computerActionAlter(int board[][BOARDSIZE], int color){
-	int grid[2], num;
-	
-	// 盤面を表示する
-	printBoard(board);
-	
-	/* ここに別のマス選択アルゴリズムを書く */
-	// ひっくり返す石の数を必ずnumに入れること
-	num = evaluate(board, grid, color);
-	
-	// どこにも置けない場合
-	if(num == 0){
-		printf("コンピュータの番ですが、どこにも置くことができません\n");
-		return 0;
-	}
-	
-	// ひっくり返す
-	update(board, grid, color);
 
 	return num;
 }
@@ -146,15 +97,15 @@ int computerActionAlter(int board[][BOARDSIZE], int color){
 int update(int array[][BOARDSIZE], int grid[2], int color){
 	int x = grid[0], y = grid[1];
 	int num;
-	
+
 	// すでに石が置いてある場所ではないことを確認
 	if(array[x][y] != BLANC)
 		return 0;	// 置けないので1
-	
+
 	// 実際に置いてみる
 	if((num = check(array, grid, color, 1)) == 0)
 		return 0;	// 置けなかった
-	
+
 	// 問題なかったので、置いた報告をしてから0を返して終了
 	//printf("%s stone has put on (%d, %d)\n", (color == 1) ? "BLACK" : "WHITE", grid[0]+1, grid[1]+1);
 	//printf("%d stones has been fliped\n\n", num);
@@ -165,15 +116,15 @@ int update(int array[][BOARDSIZE], int grid[2], int color){
 void printBoard(int board[][BOARDSIZE]){
 	int i, j;
 	// 表示される向きを調整するために、添字を[j][i]とする
-	
+
 	printf("\n");	// 読みやすくするため
-	
+
 	// 列番号
 	printf(" ");
 	for(i = 0; i < BOARDSIZE; i++)
 		printf("%d", i+1);
 	printf("\n");
-	
+
 	// 盤面の表示
 	for(i = 0; i < BOARDSIZE; i++){
 		printf("%d", i+1);	// 行番号
@@ -202,13 +153,13 @@ int check(int array[][BOARDSIZE], int grid[2], int color, int mode){
 	int x = grid[0], y = grid[1];
 	int xi, yi, k;
 	int count, sum;		// 取れる石のカウント、最大数
-	
+
 	// すでに石が置いてある場所ではないことを確認
 	if(array[x][y] != BLANC)
 		return 0;	// 置けないので0
-	
+
 	sum = 0;
-	
+
 	// 上に2つ以上マスがある
 	if(y >= 2){
 		// 1つ上をチェック
@@ -225,7 +176,7 @@ int check(int array[][BOARDSIZE], int grid[2], int color, int mode){
 				if(array[x][yi] == color){
 					// 自分の石があったので、count個ひっくり返せる
 					sum += count;
-					
+
 					/* 実際にひっくり返す場合だけの処理 */
 					if(mode){
 						for(k = y; k > yi; k--){
@@ -233,7 +184,7 @@ int check(int array[][BOARDSIZE], int grid[2], int color, int mode){
 						}
 					}
 					/* ------------------------------------------------ */
-					
+
 					break;
 				}
 				// 相手の石が続く
@@ -241,7 +192,7 @@ int check(int array[][BOARDSIZE], int grid[2], int color, int mode){
 			}
 		}
 	}
-	
+
 	// 下に2つ以上マスがある
 	if(y <= 5){
 		// 1つ下をチェック
@@ -258,7 +209,7 @@ int check(int array[][BOARDSIZE], int grid[2], int color, int mode){
 				if(array[x][yi] == color){
 					// 自分の石があったので、count個ひっくり返せる
 					sum += count;
-					
+
 					/* 実際にひっくり返す場合だけの処理 */
 					if(mode){
 						for(k = y; k < yi; k++){
@@ -266,7 +217,7 @@ int check(int array[][BOARDSIZE], int grid[2], int color, int mode){
 						}
 					}
 					/* ------------------------------------------------ */
-					
+
 					break;
 				}
 				// 相手の石が続く
@@ -274,7 +225,7 @@ int check(int array[][BOARDSIZE], int grid[2], int color, int mode){
 			}
 		}
 	}
-	
+
 	// 左に2つ以上マスがある
 	if(x >= 2){
 		// 1つ左をチェック
@@ -291,7 +242,7 @@ int check(int array[][BOARDSIZE], int grid[2], int color, int mode){
 				if(array[xi][y] == color){
 					// 自分の石があったので、count個ひっくり返せる
 					sum += count;
-					
+
 					/* 実際にひっくり返す場合だけの処理 */
 					if(mode){
 						for(k = x; k > xi; k--){
@@ -299,7 +250,7 @@ int check(int array[][BOARDSIZE], int grid[2], int color, int mode){
 						}
 					}
 					/* ------------------------------------------------ */
-					
+
 					break;
 				}
 				// 相手の石が続く
@@ -307,7 +258,7 @@ int check(int array[][BOARDSIZE], int grid[2], int color, int mode){
 			}
 		}
 	}
-	
+
 	// 右に2つ以上マスがある
 	if(x <= 5){
 		// 1つ右をチェック
@@ -324,7 +275,7 @@ int check(int array[][BOARDSIZE], int grid[2], int color, int mode){
 				if(array[xi][y] == color){
 					// 自分の石があったので、count個ひっくり返せる
 					sum += count;
-					
+
 					/* 実際にひっくり返す場合だけの処理 */
 					if(mode){
 						for(k = x; k < xi; k++){
@@ -332,7 +283,7 @@ int check(int array[][BOARDSIZE], int grid[2], int color, int mode){
 						}
 					}
 					/* ------------------------------------------------ */
-					
+
 					break;
 				}
 				// 相手の石が続く
@@ -340,7 +291,7 @@ int check(int array[][BOARDSIZE], int grid[2], int color, int mode){
 			}
 		}
 	}
-	
+
 	// 左上の斜め方向に2つ以上マスがある
 	if(x >= 2 && y >= 2){
 		// 1つ左上をチェック
@@ -360,7 +311,7 @@ int check(int array[][BOARDSIZE], int grid[2], int color, int mode){
 				if(array[xi][yi] == color){
 					// 自分の石があったので、count個ひっくり返せる
 					sum += count;
-					
+
 					/* 実際にひっくり返す場合だけの処理 */
 					if(mode){
 						for(k = 0; k < x - xi; k++){	// xの移動量とyの移動量は同じなので
@@ -368,7 +319,7 @@ int check(int array[][BOARDSIZE], int grid[2], int color, int mode){
 						}
 					}
 					/* ------------------------------------------------ */
-					
+
 					break;
 				}
 				// 相手の石が続く
@@ -376,9 +327,9 @@ int check(int array[][BOARDSIZE], int grid[2], int color, int mode){
 				xi--;
 				yi--;
 			}
-		}	
+		}
 	}
-	
+
 	// 左下の斜め方向に2つ以上マスがある
 	if(x >= 2 && y <= 5){
 		// 1つ左下をチェック
@@ -398,7 +349,7 @@ int check(int array[][BOARDSIZE], int grid[2], int color, int mode){
 				if(array[xi][yi] == color){
 					// 自分の石があったので、count個ひっくり返せる
 					sum += count;
-					
+
 					/* 実際にひっくり返す場合だけの処理 */
 					if(mode){
 						for(k = 0; k < x - xi; k++){	// xの移動量とyの移動量は同じなので
@@ -406,7 +357,7 @@ int check(int array[][BOARDSIZE], int grid[2], int color, int mode){
 						}
 					}
 					/* ------------------------------------------------ */
-					
+
 					break;
 				}
 				// 相手の石が続く
@@ -414,9 +365,9 @@ int check(int array[][BOARDSIZE], int grid[2], int color, int mode){
 				xi--;
 				yi++;
 			}
-		}	
+		}
 	}
-	
+
 	// 右下の斜め方向に2つ以上マスがある
 	if(x <= 5 && y <= 5){
 		// 1つ右下をチェック
@@ -436,7 +387,7 @@ int check(int array[][BOARDSIZE], int grid[2], int color, int mode){
 				if(array[xi][yi] == color){
 					// 自分の石があったので、count個ひっくり返せる
 					sum += count;
-					
+
 					/* 実際にひっくり返す場合だけの処理 */
 					if(mode){
 						for(k = 0; k < xi - x; k++){		// xの移動量とyの移動量は同じなので
@@ -444,7 +395,7 @@ int check(int array[][BOARDSIZE], int grid[2], int color, int mode){
 						}
 					}
 					/* ------------------------------------------------ */
-					
+
 					break;
 				}
 				// 相手の石が続く
@@ -452,9 +403,9 @@ int check(int array[][BOARDSIZE], int grid[2], int color, int mode){
 				xi++;
 				yi++;
 			}
-		}	
+		}
 	}
-	
+
 	// 右上の斜め方向に2つ以上マスがある
 	if(x <= 5 && y >= 2){
 		// 1つ右上をチェック
@@ -474,7 +425,7 @@ int check(int array[][BOARDSIZE], int grid[2], int color, int mode){
 				if(array[xi][yi] == color){
 					// 自分の石があったので、count個ひっくり返せる
 					sum += count;
-					
+
 					/* 実際にひっくり返す場合だけの処理 */
 					if(mode){
 						for(k = 0; k < xi - x; k++){		// xの移動量とyの移動量は同じなので
@@ -482,7 +433,7 @@ int check(int array[][BOARDSIZE], int grid[2], int color, int mode){
 						}
 					}
 					/* ------------------------------------------------ */
-					
+
 					break;
 				}
 				// 相手の石が続く
@@ -490,8 +441,8 @@ int check(int array[][BOARDSIZE], int grid[2], int color, int mode){
 				xi++;
 				yi--;
 			}
-		}	
+		}
 	}
-	
+
 	return sum;
 }

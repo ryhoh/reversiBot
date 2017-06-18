@@ -11,6 +11,56 @@
 #include "system.h"
 #include "search.h"
 
+// コンピュータに操作させる場合の関数
+
+// コンピュータが石を置く操作
+// ひっくり返した石の数を返す（置けなければ0）
+int computerAction(int board[][BOARDSIZE], int color){
+	int grid[2], num;
+
+	// 盤面を表示する
+	printBoard(board);
+
+	/* ここにマス選択アルゴリズムを書く */
+	// ひっくり返す石の数を必ずnumに入れること
+	num = selectMax(board, grid, color);
+
+	// どこにも置けない場合
+	if(num == 0){
+		printf("コンピュータの番ですが、どこにも置くことができません\n");
+		return 0;
+	}
+
+	// ひっくり返す
+	update(board, grid, color);
+
+	return num;
+}
+// 異なるアルゴリズムを持つコンピュータ同士を勝負させる時用
+// コンピュータが石を置く操作
+// ひっくり返した石の数を返す（置けなければ0）
+int computerActionAlter(int board[][BOARDSIZE], int color){
+	int grid[2], num;
+
+	// 盤面を表示する
+	printBoard(board);
+
+	/* ここに別のマス選択アルゴリズムを書く */
+	// ひっくり返す石の数を必ずnumに入れること
+	num = evaluate(board, grid, color);
+
+	// どこにも置けない場合
+	if(num == 0){
+		printf("コンピュータの番ですが、どこにも置くことができません\n");
+		return 0;
+	}
+
+	// ひっくり返す
+	update(board, grid, color);
+
+	return num;
+}
+
 // -------------------------------------------先読み（探索）アルゴリズム
 // 先読みに限度がある可能性から、幅優先探索で先読みを行う
 // 選んだ座標をgridに入れる
@@ -25,7 +75,7 @@
 	METHOD stack[SIZE];		// 調べる座標を入れるスタック
 	METHOD *pStack = NULL;			// スタックポインタ　スタックが空の場合はNULLを指す
 	int max = 0;
-	
+
 	// 現在の盤面から打てる手をプッシュする
 	for(i = 0; i < BOARDSIZE; i++){
 		for(j = 0; j < BOARDSIZE; j++){
@@ -36,19 +86,19 @@
 				push(board, pStack, grid);
 		}
 	}
-	
+
 	// ポップして探索する
 	while(1){
 		// ポップできなくなったら終了
 		if(pStack == NULL)
 			break;
-		
+
 		// ポップ
 		grid[0] = pStack->grid[0];
 		grid[1] = pStack->grid[1];
 		// in progress..
 	}
-	
+
 	return max;
 }*/
 
@@ -62,7 +112,7 @@
 int evaluate(int board[][BOARDSIZE], int grid[2], int color){
 	int max = 0, tmpGrid[2];
 	int i, j, tmp;
-	
+
 	// マス1つ1つをチェック
 	for(i = 0; i < BOARDSIZE; i++){
 		for(j = 0; j < BOARDSIZE; j++){
@@ -72,7 +122,7 @@ int evaluate(int board[][BOARDSIZE], int grid[2], int color){
 			tmp = check(board, tmpGrid, color, 0);
 			if(tmp == 0)
 				continue;	// 置けないので無視
-			
+
 			// 四隅を最重要視する
 			if((i == 0 && j == 0) || (i == BOARDSIZE-1 && j == BOARDSIZE-1))
 				tmp += 100;
@@ -85,7 +135,7 @@ int evaluate(int board[][BOARDSIZE], int grid[2], int color){
 			// どれにも該当しないならば取れる石の数+1にする
 			else					// これは、置きたくないマスの評価値と
 				tmp += 1;		// 明確に区別するためである
-			
+
 			if(max < tmp){
 				// もっと評価値が高い場所を見つけた
 				max = tmp;
@@ -95,7 +145,7 @@ int evaluate(int board[][BOARDSIZE], int grid[2], int color){
 			}
 		}
 	}
-	
+
 	return max;
 }
 
@@ -107,7 +157,7 @@ int evaluate(int board[][BOARDSIZE], int grid[2], int color){
 int selectMax(int board[][BOARDSIZE], int grid[2], int color){
 	int max = 0, tmpGrid[2];
 	int i, j, tmp;
-	
+
 	// マス1つ1つをチェック
 	for(i = 0; i < BOARDSIZE; i++){
 		for(j = 0; j < BOARDSIZE; j++){
@@ -122,7 +172,7 @@ int selectMax(int board[][BOARDSIZE], int grid[2], int color){
 			}
 		}
 	}
-	
+
 	return max;
 }
 
@@ -130,7 +180,7 @@ int selectMax(int board[][BOARDSIZE], int grid[2], int color){
 int selectMin(int board[][BOARDSIZE], int grid[2], int color){
 	int min = 255, tmpGrid[2];
 	int i, j, tmp;
-	
+
 	// マス1つ1つをチェック
 	for(i = 0; i < BOARDSIZE; i++){
 		for(j = 0; j < BOARDSIZE; j++){
@@ -147,7 +197,7 @@ int selectMin(int board[][BOARDSIZE], int grid[2], int color){
 			}
 		}
 	}
-	
+
 	if(min == 255)
 		return 0;	// 置ける場所が1つもない
 	return min;
@@ -161,14 +211,14 @@ int selectMin(int board[][BOARDSIZE], int grid[2], int color){
 int push(METHOD stack[], METHOD *p, int var[2]){
 	if(p == stack + SIZE - 1)
 		return 1;	// これ以上プッシュできない
-	
+
 	if(p == NULL)	// 空のスタックに1つ目を追加する場合
 		p = stack;
-	
+
 	p++;		// 次に移動
 	p->grid[0] = var[0];
 	p->grid[1] = var[1];
-	
+
 	return 0;
 }
 
@@ -178,19 +228,19 @@ int situation(int board[][BOARDSIZE], int color){
 	int i, j;
 	int num[3] = {0};	// 石の数
 	// num[0]は空白のマスの数、num[1]はBLACKの数、num[2]はWHITEの数
-	
+
 	// 色反転操作用の配列
 	// flip[BLACK]はWHITEを、flip[WHITE]はBLACKを導くので、
 	// 実際の色に関係なくflip[color]として必ず色を反転できる
 	// flip[0]は使用しない
 	const int flip[3] = {0, WHITE, BLACK};
-	
+
 	// 数える
 	for(i = 0; i < BOARDSIZE; i++){
 		for(j = 0; j < BOARDSIZE; j++){
 			num[ board[i][j] ]++;
 		}
 	}
-	
+
 	return (num[color] > num[flip[color]]) ? 1 : 0;
 }
